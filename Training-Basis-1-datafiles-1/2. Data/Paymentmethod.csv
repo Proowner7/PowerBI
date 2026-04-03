@@ -1,0 +1,8 @@
+﻿Payment Method ID;Payment Method Name
+1;Ideal
+2;Paypal
+3;Mastercard
+4;American Express
+5;Visa
+6;Cash
+7;Other
