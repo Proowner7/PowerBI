@@ -1,0 +1,5 @@
+# Treat Power BI and Office binary files as binary to prevent
+# line-ending corruption on Windows (core.autocrlf=true).
+*.pbix binary
+*.pbit binary
+*.xlsx binary
