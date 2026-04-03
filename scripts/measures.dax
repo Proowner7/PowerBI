@@ -1,0 +1,59 @@
+-- =============================================================================
+-- measures.dax
+-- DAX measures to add in Power BI Desktop after the data model is set up.
+--
+-- How to add each measure:
+--   1. Open PowerBI Training.pbix in Power BI Desktop.
+--   2. Select the Orders table in the Fields pane.
+--   3. Click "New Measure" on the Home ribbon.
+--   4. Paste one measure at a time and press Enter.
+-- =============================================================================
+
+
+-- ---------------------------------------------------------------------------
+-- Core KPIs  (add to the Orders table)
+-- ---------------------------------------------------------------------------
+
+Total Sales = SUM(Orders[Sales])
+
+Total Orders = COUNTROWS(Orders)
+
+Avg Order Value = DIVIDE([Total Sales], [Total Orders])
+
+Unique Customers = DISTINCTCOUNT(Orders[Customer ID])
+
+
+-- ---------------------------------------------------------------------------
+-- Time intelligence  (requires Calendar[Date] to be related to
+--                     Orders[Salesdate] in the Model view)
+-- ---------------------------------------------------------------------------
+
+Sales YTD =
+    TOTALYTD(
+        [Total Sales],
+        Calendar[Date]
+    )
+
+Sales PY =
+    CALCULATE(
+        [Total Sales],
+        SAMEPERIODLASTYEAR(Calendar[Date])
+    )
+
+-- Month-over-Month growth percentage
+Sales MoM % =
+    VAR CurrentSales   = [Total Sales]
+    VAR PriorMonthSales =
+        CALCULATE(
+            [Total Sales],
+            DATEADD(Calendar[Date], -1, MONTH)
+        )
+    RETURN
+        DIVIDE(CurrentSales - PriorMonthSales, PriorMonthSales)
+
+-- Running total (cumulative sales within a year)
+Sales Running Total =
+    CALCULATE(
+        [Total Sales],
+        DATESYTD(Calendar[Date])
+    )
