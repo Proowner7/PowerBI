@@ -61,3 +61,29 @@ The following columns were added to the data files to make them more insightful 
 | `PriceCategory` | **Budget** (≤ 80), **Mid-range** (81 – 160), **Premium** (> 160) based on `Price` | Enables price-tier analysis alongside product line breakdowns |
 
 > Price thresholds were chosen based on the natural distribution of the 144 product prices (range 52 – 260, median 158).
+
+## Visualisation Improvements — Steps Taken
+
+All changes were applied directly to the JSON report definition inside `PowerBI Training.pbix`.
+
+### Page 1 — "Sales Performance Dashboard" (existing page, updated)
+
+| Visual | Change | Why |
+|--------|--------|-----|
+| **Title textbox** | Text changed from `"Title"` → `"Sales Performance Dashboard"`; font size bumped to 24 pt | Gives the page a clear, professional heading |
+| **Table: Top Products by Revenue** | Added visual container title *"Top Products by Revenue"* | Makes the purpose of the table immediately clear |
+| **Line chart: Monthly Sales Trend** | Added visual container title *"Monthly Sales Trend"*; enabled data labels and line markers | Labels on each point let readers read exact values without hovering; markers make individual months easier to identify |
+| **Donut chart: Customers by Gender** | Added visual container title *"Customers by Gender"*; enabled data labels showing category + percentage | Without labels the chart requires hovering; percentages provide instant insight |
+| **Python map** | Added visual container title *"Customer Locations (Netherlands)"*; improved script to handle comma-decimal coordinates, added a total-customer annotation box, improved colour and transparency | Fixes a potential parsing issue with Dutch-locale decimal separators; annotation removes the need to count dots manually |
+
+### Page 2 — "Sales Breakdown" (new page)
+
+A brand-new page was added with three visuals that answer business questions not visible on Page 1:
+
+| Visual | Description | Business question answered |
+|--------|-------------|---------------------------|
+| **Horizontal bar — "Top 15 Products by Total Revenue"** | Sum of Sales per product, sorted descending, top 15 shown, with data labels | *Which products drive the most revenue?* |
+| **Clustered column — "Revenue by Payment Method"** | Sum of Sales by PaymethodID, sorted descending, with data labels | *How do customers prefer to pay?* |
+| **Clustered column — "Revenue & Units Sold by Delivery Company"** | Sum of Sales and Sum of Amount by DelcompID, with data labels | *Which delivery partner handles the most business?* |
+
+> All new visuals use `drillFilterOtherVisuals = true` so that clicking any bar cross-filters the other visuals on the page.
