@@ -13,6 +13,10 @@
 -- ---------------------------------------------------------------------------
 -- Core KPIs  (add to the Orders table)
 -- ---------------------------------------------------------------------------
+-- Tip: after adding each measure, set its format string in the Measure Tools
+--   ribbon: Total Sales / Avg Order Value → Currency (€ #,0.00)
+--                                            Total Orders / Unique Customers → Whole number (#,0)
+--                                            Sales MoM % → Percentage (0.0%)
 
 Total Sales = SUM(Orders[Sales])
 

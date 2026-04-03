@@ -22,10 +22,12 @@ After running this script, open the PBIX in Power BI Desktop and:
   3. Verify all relationship joins in the Model view.
 """
 
+import argparse
 import hashlib
 import io
 import json
 import os
+import tempfile
 import zipfile
 
 # ---------------------------------------------------------------------------
@@ -668,20 +670,29 @@ def rebuild_pbix(pbix_path: str) -> None:
                 zipfile.ZIP_DEFLATED,
             )
 
-    # --- Re-pack into a new ZIP in memory then write atomically ---------------
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w") as zout:
-        for filename, (data, compress_type) in entries.items():
-            # Power BI Desktop requires DataModel to be stored uncompressed.
-            actual_compress = (
-                zipfile.ZIP_STORED
-                if filename == "DataModel"
-                else compress_type
-            )
-            zout.writestr(filename, data, compress_type=actual_compress)
-
-    with open(pbix_path, "wb") as fh:
-        fh.write(buf.getvalue())
+    # --- Re-pack into a temp file then atomically replace the source ---------
+    tmp_fd, tmp_path = tempfile.mkstemp(
+        dir=os.path.dirname(os.path.abspath(pbix_path)),
+        suffix=".pbix.tmp",
+    )
+    try:
+        with os.fdopen(tmp_fd, "wb") as fh:
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w") as zout:
+                for filename, (data, compress_type) in entries.items():
+                    # Power BI Desktop requires DataModel stored uncompressed.
+                    actual_compress = (
+                        zipfile.ZIP_STORED
+                        if filename == "DataModel"
+                        else compress_type
+                    )
+                    zout.writestr(filename, data, compress_type=actual_compress)
+            fh.write(buf.getvalue())
+        os.replace(tmp_path, pbix_path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
 
     # --- Summary --------------------------------------------------------------
     page_summary = ", ".join(f'"{d}"' for _, d in PAGES)
@@ -696,4 +707,14 @@ def rebuild_pbix(pbix_path: str) -> None:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    rebuild_pbix(PBIX_PATH)
+    parser = argparse.ArgumentParser(
+        description="Rebuild PowerBI Training.pbix with five report pages."
+    )
+    parser.add_argument(
+        "pbix",
+        nargs="?",
+        default=PBIX_PATH,
+        help="Path to the .pbix file to update (default: %(default)s)",
+    )
+    args = parser.parse_args()
+    rebuild_pbix(args.pbix)
