@@ -1,0 +1,5 @@
+# Treat Power BI and Office binary files as binary to prevent git
+# CRLF line-ending conversion from corrupting them on Windows.
+*.pbix binary
+*.pbit binary
+*.xlsx binary
